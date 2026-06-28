@@ -1,7 +1,7 @@
 import { AlertTriangle, Droplets, MapPin, RefreshCw, ThermometerSun, Wind } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { endpoints } from "../api/api";
+import { API_BASE_URL, endpoints } from "../api/api";
 import { AQICard } from "../components/AQICard";
 import { ChartCard } from "../components/ChartCard";
 import { PollutantCard } from "../components/PollutantCard";
@@ -10,9 +10,10 @@ import { aqiColor, shortDate } from "../utils/aqiUtils";
 
 export default function Dashboard() {
   const [city,setCity]=useState("Nagpur"); const [data,setData]=useState<DashboardData>(); const [error,setError]=useState("");
-  useEffect(()=>{setError("");endpoints.dashboard(city).then(setData).catch(()=>setError("Unable to load air intelligence. Check that the API is running."))},[city]);
-  if(error)return <div className="panel flex items-center gap-3 text-red-500"><AlertTriangle/>{error}</div>;
-  if(!data)return <div className="panel animate-pulse text-sm text-slate-400">Synchronising atmospheric signals…</div>;
+  const load=()=>{setError("");setData(undefined);endpoints.dashboard(city).then(setData).catch(()=>setError(`Unable to reach ${API_BASE_URL}. A free Render service can take up to a minute to wake up.`))};
+  useEffect(load,[city]);
+  if(error)return <div className="panel flex flex-col items-start gap-4 text-red-500 sm:flex-row sm:items-center"><AlertTriangle className="shrink-0"/><div className="flex-1"><b>Air intelligence is temporarily unavailable</b><p className="mt-1 text-sm text-slate-500">{error}</p></div><button className="btn-primary shrink-0" onClick={load}><RefreshCw size={15}/>Retry connection</button></div>;
+  if(!data)return <div className="panel flex items-center gap-3 text-sm text-slate-400"><RefreshCw className="animate-spin" size={17}/>Synchronising atmospheric signals… The deployed model may be waking up.</div>;
   const c=data.current;
   return <div className="mx-auto max-w-[1500px] space-y-5">
     <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow">Live atmospheric snapshot</p><h2 className="mt-2 font-display text-3xl font-bold tracking-tight">Good evening, analyst.</h2><p className="mt-1 text-sm text-slate-400">Here’s what the air is telling us right now.</p></div><label className="flex items-center gap-2 rounded-xl border border-emerald-950/10 bg-white/60 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5"><MapPin size={16}/><select className="bg-transparent font-semibold outline-none" value={city} onChange={e=>setCity(e.target.value)}>{["Nagpur","Pune","Mumbai","Delhi","Bengaluru","Hyderabad"].map(x=><option key={x}>{x}</option>)}</select><RefreshCw size={14} className="text-slate-400"/></label></div>

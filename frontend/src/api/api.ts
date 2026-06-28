@@ -1,7 +1,21 @@
 import axios from "axios";
 import type { AirInput } from "../types";
 
-export const api = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000", timeout: 20000 });
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:8000").replace(/\/+$/, "");
+export const api = axios.create({ baseURL: API_BASE_URL, timeout: 75000 });
+
+api.interceptors.response.use(
+  response => response,
+  async error => {
+    const config = error.config as (typeof error.config & { _retried?: boolean }) | undefined;
+    if (config && !config._retried && (!error.response || error.response.status >= 500)) {
+      config._retried = true;
+      await new Promise(resolve => setTimeout(resolve, 1400));
+      return api.request(config);
+    }
+    return Promise.reject(error);
+  },
+);
 export const endpoints = {
   cities: () => api.get("/cities").then(r => r.data),
   dashboard: (city = "Nagpur") => api.get("/dashboard", { params: { city } }).then(r => r.data),
