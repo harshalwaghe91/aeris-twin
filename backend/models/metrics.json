@@ -1,0 +1,21 @@
+{
+  "mae": 0.63,
+  "rmse": 0.77,
+  "r2": 1.0,
+  "selected_model": "Linear Regression",
+  "models_compared": {
+    "Random Forest": {
+      "mae": 8.9,
+      "rmse": 14.8,
+      "r2": 0.957
+    },
+    "Linear Regression": {
+      "mae": 0.63,
+      "rmse": 0.77,
+      "r2": 1.0
+    }
+  },
+  "training_rows": 36,
+  "features": 10,
+  "cities": 6
+}
